@@ -1,0 +1,124 @@
+.root { display: flex; flex-direction: column; gap: 10px; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-faint);
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.tab {
+  padding: 5px 14px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.tab:hover { color: var(--text-secondary); }
+
+.tabActive {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-faint);
+  background: var(--bg-muted);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.statusLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.charCount {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.12s;
+  margin-left: auto;
+}
+
+.copyBtn:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.copied {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: var(--success-dim);
+  color: var(--success);
+}
+
+.cardBody {
+  padding: 22px 22px;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  min-height: 120px;
+}
+
+/* Skeleton */
+.skeleton { display: flex; flex-direction: column; gap: 10px; }
+
+.skeletonLine {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-muted) 50%, var(--bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Cursor */
+.cursor {
+  display: inline-block;
+  animation: blink 0.7s step-end infinite;
+  color: var(--accent);
+  margin-left: 1px;
+}
