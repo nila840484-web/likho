@@ -33,6 +33,10 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
 
+    if (!apiKey) {
+      return NextResponse.json({ error: "API key missing" }, { status: 500 });
+    }
+
     const promises = Array.from({ length: opts.variations }, async (_, i) => {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -48,14 +52,25 @@ export async function POST(req: NextRequest) {
           }),
         }
       );
+
       const data = await response.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      console.log("Gemini response:", JSON.stringify(data).slice(0, 300));
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!text) {
+        const reason = data.candidates?.[0]?.finishReason || "UNKNOWN";
+        console.error("No text in response. Reason:", reason, "Full:", JSON.stringify(data));
+        return `[Error: ${reason}]`;
+      }
+
+      return text;
     });
 
     const results = await Promise.all(promises);
     return NextResponse.json({ results });
   } catch (err) {
-    console.error(err);
+    console.error("Route error:", err);
     return NextResponse.json({ error: "Generation failed" }, { status: 500 });
   }
 }
