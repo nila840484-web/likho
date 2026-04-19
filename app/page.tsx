@@ -170,8 +170,8 @@ export default function Home() {
 
         {/* Footer */}
         <footer className={styles.footer}>
-          <span>Likhon AI · Made for Bangladesh 🇧🇩</span>
-          <span>Powered by Claude</span>
+          <span>Likho AI · Made for Bangladesh 🇧🇩</span>
+          <span>develop by SRABON>😄</span>
         </footer>
       </main>
     </div>
