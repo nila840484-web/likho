@@ -9,14 +9,16 @@ function buildPrompt(opts: GenerateOptions, variationIndex: number): string {
     english: "Write entirely in English.",
   };
 
-  return `Write ${opts.contentType} content about: ${opts.topic}
-Tone: ${opts.tone}
-Platform: ${opts.platform}
-Language instruction: ${langInstructions[opts.language]}
-${opts.hashtags ? "Add relevant hashtags at the end." : "No hashtags."}
-${opts.emoji ? "Use appropriate emojis." : "No emojis."}
-${variationIndex > 0 ? `This is variation ${variationIndex + 1}, write in a completely different style.` : ""}
-Start writing immediately:`;
+  return `বিষয়: ${opts.topic}
+কন্টেন্ট ধরন: ${opts.contentType}
+টোন: ${opts.tone}
+প্ল্যাটফর্ম: ${opts.platform}
+ভাষা: ${langInstructions[opts.language]}
+${opts.hashtags ? "শেষে প্রাসঙ্গিক হ্যাশট্যাগ যোগ করো।" : "কোনো হ্যাশট্যাগ দেবে না।"}
+${opts.emoji ? "উপযুক্ত ইমোজি ব্যবহার করো।" : "ইমোজি ব্যবহার করবে না।"}
+${variationIndex > 0 ? `ভ্যারিয়েশন ${variationIndex + 1} — আগেরটা থেকে সম্পূর্ণ আলাদা স্টাইলে লেখো।` : ""}
+
+এখনই লেখা শুরু করো:`;
 }
 
 export async function POST(req: NextRequest) {
@@ -27,41 +29,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Topic is required" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: "API key missing" }, { status: 500 });
     }
 
     const promises = Array.from({ length: opts.variations }, async (_, i) => {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: buildPrompt(opts, i) }] }],
-            generationConfig: {
-              maxOutputTokens: 1024,
-              temperature: i > 0 ? 0.9 : 0.7,
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: "তুমি একজন expert বাংলা কন্টেন্ট রাইটার। কোনো ভূমিকা বা ব্যাখ্যা ছাড়াই সরাসরি কন্টেন্ট দাও।"
             },
-            safetySettings: [
-              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-            ],
-          }),
-        }
-      );
+            {
+              role: "user",
+              content: buildPrompt(opts, i)
+            }
+          ],
+          max_tokens: 1024,
+          temperature: i > 0 ? 0.9 : 0.7,
+        }),
+      });
 
       const data = await response.json();
-      console.log("Gemini raw:", JSON.stringify(data).slice(0, 500));
-
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const text = data.choices?.[0]?.message?.content;
       if (!text) {
-        console.error("Empty response:", JSON.stringify(data));
-        return "দুঃখিত, এই মুহূর্তে কন্টেন্ট তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করো।";
+        console.error("Groq error:", JSON.stringify(data));
+        return "দুঃখিত, আবার চেষ্টা করো।";
       }
       return text;
     });
@@ -73,3 +74,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Generation failed" }, { status: 500 });
   }
 }
+
